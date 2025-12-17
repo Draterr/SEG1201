@@ -82,7 +82,7 @@ CREATE TABLE Vehicle(
 
 CREATE TABLE Personnel (
     PersonnelID NUMBER PRIMARY KEY,
-    StationID NUMBER NOT NULL,
+    StationID NUMBER NOT NULL, 
     RoleID NUMBER NOT NULL,
     FirstName VARCHAR2(50) NOT NULL,
     LastName VARCHAR2(50) NOT NULL,
@@ -610,8 +610,36 @@ SELECT * FROM Deployment;
 SELECT * FROM Volunteer;
 
 /* Part 2 Q3 */
--- Question f.
+-- Question b.
+-- Track personnel information (Station,Area,Role) and deployment frequency across the organization
+SELECT p.PersonnelID AS "Personnel ID", p.FirstName AS "First Name", r.RoleName AS "Role", 
+s.name AS "Stationed At", a.areaname AS "Area", COUNT(d.deploymentid) AS "Number Of Deployments"
+FROM personnel p
+LEFT JOIN roles r
+ON p.RoleID = r.RoleID
+LEFT JOIN Station s
+ON p.StationID = s.StationID
+LEFT JOIN area a
+ON s.AreaID = a.areaID
+LEFT JOIN deployment d
+ON p.PersonnelID = d.PersonnelID
+GROUP BY p.PersonnelID , p.FirstName , r.RoleName, s.name, a.areaname 
+ORDER BY p.PersonnelID ASC
 
+-- Question c.
+-- Lists all personnel with the role of Search and Rescue Lead who have been deployed to disasters
+SELECT p.PersonnelID AS "Personnel ID", p.FirstName AS "First Name", r.RoleName AS "Role", ds.DisasterID AS "Disaster ID", ds.DisasterName AS "Disaster Name"
+FROM Personnel p
+LEFT JOIN Roles r
+ON p.roleID = r.roleID
+LEFT JOIN Deployment d
+ON p.personnelID = d.personnelID
+LEFT JOIN Disaster ds
+ON d.disasterID = ds.disasterID
+WHERE r.RoleName LIKE 'Search%'
+
+
+-- Question f.
 /*
 List the relief centers that have handled the highest number of aid distributions within
 the past three months, along with the volunteers most frequently assigned to those
