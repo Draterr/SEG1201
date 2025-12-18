@@ -610,6 +610,22 @@ SELECT * FROM Deployment;
 SELECT * FROM Volunteer;
 
 /* Part 2 Q3 */
+-- Question a.
+/* List the name of each disaster type and the number of disasters 
+   of that type. Include types with no disasters. */
+
+SELECT 
+    dt.Name AS "Disaster Type Name", 
+    COUNT(d.DisasterID) AS "Number of Disasters"
+FROM 
+    Disaster_Type dt
+LEFT JOIN 
+    Disaster d ON dt.Type = d.DisasterType
+GROUP BY 
+    dt.Name
+ORDER BY 
+    "Number of Disasters" DESC;
+    
 -- Question b.
 -- Track personnel information (Station,Area,Role) and deployment frequency across the organization
 SELECT p.PersonnelID AS "Personnel ID", p.FirstName AS "First Name", r.RoleName AS "Role", 
