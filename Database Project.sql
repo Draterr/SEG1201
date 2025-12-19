@@ -654,7 +654,33 @@ LEFT JOIN Disaster ds
 ON d.disasterID = ds.disasterID
 WHERE r.RoleName LIKE 'Search%'
 
-
+--Question d.
+-- List all critical active disasters AND resolved major flood OR fire incidents
+SELECT 
+    d.DisasterID,
+    d.DisasterName,
+    d.DisasterType,
+    d.Severity_Level,
+    d.Status,
+    d.Start_Date,
+    d.End_Date,
+    a.AreaName,
+    a.AreaCode,
+    dt.Name AS Disaster_Type_Name,
+    dt.Description
+FROM 
+    Disaster d
+    JOIN Area a ON d.AreaID = a.AreaID
+    JOIN Disaster_Type dt ON d.DisasterType = dt.Type
+WHERE 
+    (d.Status = 'Active' AND d.Severity_Level >= 4)
+    OR 
+    (d.Status = 'Resolved' AND (d.DisasterType = 'FLOOD' OR d.DisasterType = 'FIRE') AND d.Severity_Level >= 3)
+ORDER BY 
+    d.Status DESC,
+    d.Severity_Level DESC, 
+    d.Start_Date DESC;
+    
 -- Question f.
 /*
 List the relief centers that have handled the highest number of aid distributions within
