@@ -680,7 +680,22 @@ ORDER BY
     d.Status DESC,
     d.Severity_Level DESC, 
     d.Start_Date DESC;
-    
+
+-- Question e.
+-- List all Vehicles that are currently 'Available' and located in areas with a 'Severity Level' of 5."
+SELECT License_Plate, Brand, Model 
+FROM Vehicle 
+WHERE Status = 'Available'
+  AND StationID IN (
+    SELECT StationID 
+    FROM Station 
+    WHERE AreaID IN (
+        SELECT AreaID 
+        FROM Disaster 
+        WHERE Severity_Level = 5
+    )
+);
+
 -- Question f.
 /*
 List the relief centers that have handled the highest number of aid distributions within
