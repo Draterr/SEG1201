@@ -610,12 +610,105 @@ SELECT * FROM Deployment;
 SELECT * FROM Volunteer;
 
 /* Part 2 Q3 */
--- Question f.
 
+
+-- Question a.
+
+/* List the name of each disaster type and the number of disasters 
+   of that type. Include types with no disasters. */
+SELECT 
+    dt.Name AS "Disaster Type Name", 
+    COUNT(d.DisasterID) AS "Number of Disasters"
+FROM 
+    Disaster_Type dt
+LEFT JOIN 
+    Disaster d ON dt.Type = d.DisasterType
+GROUP BY 
+    dt.Name
+ORDER BY 
+    "Number of Disasters" DESC;
+
+-- Question b.
+
+-- Track personnel information (Station,Area,Role) and deployment frequency across the organization
+SELECT p.PersonnelID AS "Personnel ID", p.FirstName AS "First Name", r.RoleName AS "Role", 
+s.name AS "Stationed At", a.areaname AS "Area", COUNT(d.deploymentid) AS "Number Of Deployments"
+FROM personnel p
+LEFT JOIN roles r
+ON p.RoleID = r.RoleID
+LEFT JOIN Station s
+ON p.StationID = s.StationID
+LEFT JOIN area a
+ON s.AreaID = a.areaID
+LEFT JOIN deployment d
+ON p.PersonnelID = d.PersonnelID
+GROUP BY p.PersonnelID , p.FirstName , r.RoleName, s.name, a.areaname 
+ORDER BY p.PersonnelID ASC;
+
+-- Question c.
+
+-- Lists all personnel with the role of Search and Rescue Lead who have been deployed to disasters
+SELECT p.PersonnelID AS "Personnel ID", p.FirstName AS "First Name", r.RoleName AS "Role", ds.DisasterID AS "Disaster ID", ds.DisasterName AS "Disaster Name"
+FROM Personnel p
+LEFT JOIN Roles r
+ON p.roleID = r.roleID
+LEFT JOIN Deployment d
+ON p.personnelID = d.personnelID
+LEFT JOIN Disaster ds
+ON d.disasterID = ds.disasterID
+WHERE r.RoleName LIKE 'Search%';
+
+--Question d.
+
+-- List all critical active disasters AND resolved major flood OR fire incidents
+SELECT 
+    d.DisasterID,
+    d.DisasterName,
+    d.DisasterType,
+    d.Severity_Level,
+    d.Status,
+    d.Start_Date,
+    d.End_Date,
+    a.AreaName,
+    a.AreaCode,
+    dt.Name AS Disaster_Type_Name,
+    dt.Description
+FROM 
+    Disaster d
+    JOIN Area a ON d.AreaID = a.AreaID
+    JOIN Disaster_Type dt ON d.DisasterType = dt.Type
+WHERE 
+    (d.Status = 'Active' AND d.Severity_Level >= 4)
+    OR 
+    (d.Status = 'Resolved' AND (d.DisasterType = 'FLOOD' OR d.DisasterType = 'FIRE') AND d.Severity_Level >= 3)
+ORDER BY 
+    d.Status DESC,
+    d.Severity_Level DESC, 
+    d.Start_Date DESC;
+
+-- Question e.
+
+-- List all Vehicles that are currently 'Available' and located in areas with a 'Severity Level' of 5."
+
+SELECT License_Plate, Brand, Model 
+FROM Vehicle 
+WHERE Status = 'Available'
+  AND StationID IN (
+    SELECT StationID 
+    FROM Station 
+    WHERE AreaID IN (
+        SELECT AreaID 
+        FROM Disaster 
+        WHERE Severity_Level = 5
+    )
+);
+
+-- Question f.
 /*
 List the relief centers that have handled the highest number of aid distributions within
 the past three months, along with the volunteers most frequently assigned to those
 centers.*/
+
 SELECT q2.shelterid,q2.sheltername,q2."Number of Aid",q1.firstname,q1.lastname,q1."Number of Assignments" FROM (SELECT s.shelterid,v.firstname,v.lastname,count(v.volunteerid) AS "Number of Assignments"
 FROM shelter s 
 JOIN assignment a ON a.shelterid = s.shelterid
