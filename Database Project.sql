@@ -640,7 +640,7 @@ ON s.AreaID = a.areaID
 LEFT JOIN deployment d
 ON p.PersonnelID = d.PersonnelID
 GROUP BY p.PersonnelID , p.FirstName , r.RoleName, s.name, a.areaname 
-ORDER BY p.PersonnelID ASC
+ORDER BY p.PersonnelID ASC;
 
 -- Question c.
 -- Lists all personnel with the role of Search and Rescue Lead who have been deployed to disasters
@@ -652,7 +652,7 @@ LEFT JOIN Deployment d
 ON p.personnelID = d.personnelID
 LEFT JOIN Disaster ds
 ON d.disasterID = ds.disasterID
-WHERE r.RoleName LIKE 'Search%'
+WHERE r.RoleName LIKE 'Search%';
 
 --Question d.
 -- List all critical active disasters AND resolved major flood OR fire incidents
