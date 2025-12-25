@@ -661,30 +661,20 @@ WHERE r.RoleName LIKE 'Search%';
 --Question d.
 
 -- List all critical active disasters AND resolved major flood OR fire incidents
-SELECT 
-    d.DisasterID,
-    d.DisasterName,
-    d.DisasterType,
-    d.Severity_Level,
-    d.Status,
-    d.Start_Date,
-    d.End_Date,
-    a.AreaName,
-    a.AreaCode,
-    dt.Name AS Disaster_Type_Name,
-    dt.Description
-FROM 
-    Disaster d
-    JOIN Area a ON d.AreaID = a.AreaID
-    JOIN Disaster_Type dt ON d.DisasterType = dt.Type
-WHERE 
-    (d.Status = 'Active' AND d.Severity_Level >= 4)
-    OR 
-    (d.Status = 'Resolved' AND (d.DisasterType = 'FLOOD' OR d.DisasterType = 'FIRE') AND d.Severity_Level >= 3)
-ORDER BY 
-    d.Status DESC,
-    d.Severity_Level DESC, 
-    d.Start_Date DESC;
+SELECT a.AreaName AS "Area With Severity Level 5", v.License_Plate, v.Brand, v.Model
+FROM Vehicle v
+JOIN Station s ON v.StationID = s.StationID
+JOIN Area a ON s.AreaID = a.AreaID
+WHERE v.Status = 'Available' 
+  AND s.AreaID IN(
+    SELECT AreaID 
+    FROM Disaster 
+    WHERE Severity_Level IN (
+        SELECT DISTINCT Severity_Level 
+        FROM Disaster 
+        WHERE Severity_Level = 4
+    )
+  );
 
 -- Question e.
 
@@ -709,15 +699,18 @@ List the relief centers that have handled the highest number of aid distribution
 the past three months, along with the volunteers most frequently assigned to those
 centers.*/
 
-SELECT q2.shelterid,q2.sheltername,q2."Number of Aid",q1.firstname,q1.lastname,q1."Number of Assignments" FROM (SELECT s.shelterid,v.firstname,v.lastname,count(v.volunteerid) AS "Number of Assignments"
+SELECT q2.shelterid,q2.sheltername,q2."Number of Aid",q1.firstname,q1.lastname,q1."Number of Assignments" 
+FROM 
+(SELECT s.shelterid,v.firstname,v.lastname,count(v.volunteerid) AS "Number of Assignments"
 FROM shelter s 
 JOIN assignment a ON a.shelterid = s.shelterid
 JOIN volunteer v ON a.volunteerid = v.volunteerid
 GROUP BY s.shelterid,v.firstname,v.lastname) q1 
 JOIN 
 (SELECT s.shelterid,s.ShelterName,count(s.shelterid) AS "Number of Aid" 
-FROM shelter s 
-JOIN distribution ds ON s.shelterid = ds.shelterid 
+FROM shelter_inventory si 
+JOIN distribution_record ds ON si.inventoryid = ds.inventoryid
+JOIN shelter s ON s.shelterid = si.shelterid 
 WHERE ds.Dist_date >= ADD_MONTHS(SYSDATE,-3)
 GROUP BY s.shelterid,ShelterName) q2 
 ON q1.shelterid = q2.shelterid 
